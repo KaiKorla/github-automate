@@ -9,6 +9,6 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - run: gh repo sync microsoft/winget-pkgs -b master
+      - run: gh repo sync KaiKorla/winget-pkgs -b master
         env:
           GH_TOKEN: ${{ secrets.SYNC_TOKEN }}

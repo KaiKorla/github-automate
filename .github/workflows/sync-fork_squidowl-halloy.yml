@@ -9,6 +9,6 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - run: gh repo sync squidowl/halloy -b main
+      - run: gh repo sync KaiKorla/halloy -b main
         env:
           GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
