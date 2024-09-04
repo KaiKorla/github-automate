@@ -11,4 +11,4 @@ jobs:
     steps:
       - run: gh repo sync microsoft/winget-pkgs -b master
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_SYNC_TOKEN }}
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
