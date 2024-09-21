@@ -1,0 +1,89 @@
+name: Prepare a PR for WINGET due a new version of gruntwork-io/terragrunt
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run sync-fork_winget-pkgs.yml
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_RUN_TOKEN }}
+
+      - name: CHECKOUT_AUTOMATE_REPOSITORY
+        uses: actions/checkout@master
+
+      - name: TERRAGRUNT_RELEASE
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_RELEASE=$(gh release view -R gruntwork-io/terragrunt --json name,publishedAt,body,assets)" >> $GITHUB_ENV
+
+      - name: TERRAGRUNT_VERSION
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_VERSION=$(echo $TERRAGRUNT_RELEASE | jq .name -r | sed s/v//g)" >> $GITHUB_ENV
+
+      - name: TERRAGRUNT_PUBLISHED_AT
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_PUBLISHED_AT=$(echo $TERRAGRUNT_RELEASE | jq .publishedAt -r)" >> $GITHUB_ENV
+
+      - name: TERRAGRUNT_RELEASE_NOTES
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_RELEASE_NOTES=$(echo $TERRAGRUNT_RELEASE | jq .body -r)" >> $GITHUB_ENV
+
+      - name: TERRAGRUNT_SHA256SUMS_FILE
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_SHA256SUMS_FILE=$(echo $TERRAGRUNT_RELEASE | jq '.assets[] | select(.name=="SHA256SUMS") | .url'  -r)" >> $GITHUB_ENV
+
+      - name: TERRAGRUNT_BINARY_X86_SHA256
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_X86_SHA256=$(wget -qO - $TERRAGRUNT_SHA256SUMS_FILE | grep terragrunt_windows_386.exe | cut -c 1-64)" >> $GITHUB_ENV
+
+      - name: TERRAGRUNT_BINARY_X64_SHA256
+        shell: bash
+        run: |
+          echo "TERRAGRUNT_X64_SHA256=$(wget -qO - $TERRAGRUNT_SHA256SUMS_FILE | grep terragrunt_windows_amd64.exe | cut -c 1-64)" >> $GITHUB_ENV
+
+      - name: CHECKOUT_WINGET_REPOSITORY
+        uses: actions/checkout@master
+        with:
+          repository: KaiKorla/winget-pkgs
+          path: ./../winget-pkgs
+          token: ${{ secrets.WINGET_PKGS_REPOSITORY_TOKEN }}
+
+      - name: CREATE_BRANCH
+        shell: bash
+        run: |
+        cd ./../winget-pkgs && git switch --create terragrunt-$TERRAGRUNT_VERSION
+
+      - name: CREATE_DIRECTORY
+        shell: bash
+        run: |
+        mkdir ./../winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
+
+      - name: COPY_TEMPLATES
+        shell: bash
+        run: |
+        cp ./templates/winget/Gruntwork/Terragrunt/* ./../winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
+
+      - name: REPLACE_VALUES
+        shell: bash
+        run: |
+        cd ./../winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
+        sed s/${version}/$TERRAGRUNT_VERSION * &&
+        sed s/${releaseDate}/$TERRAGRUNT_PUBLISHED_AT * &&
+        sed s/${x86sha256}/$TERRAGRUNT_BINARY_X86_SHA256 * &&
+        sed s/${x64sha256}/$TERRAGRUNT_BINARY_X64_SHA256 * &&
+        sed s/${releaseNotes}/$TERRAGRUNT_RELEASE_NOTES *
+
+      - name: COMMIT_AND_PUSH
+        shell: bash
+        run: |
+        cd ./../winget-pkgs &&
+        git commit -s -m "New version: Gruntwork.Terragrunt version $TERRAGRUNT_VERSION" &&
+        git push
