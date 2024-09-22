@@ -49,28 +49,28 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: KaiKorla/winget-pkgs
-          path: ./../winget-pkgs
+          path: ./winget-pkgs
           token: ${{ secrets.WINGET_PKGS_REPOSITORY_TOKEN }}
 
       - name: CREATE_BRANCH
         shell: bash
         run: |
-          cd ./../winget-pkgs && git switch --create terragrunt-$TERRAGRUNT_VERSION
+          cd ./winget-pkgs && git switch --create terragrunt-$TERRAGRUNT_VERSION
 
       - name: CREATE_DIRECTORY
         shell: bash
         run: |
-          mkdir ./../winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
+          mkdir ./winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
 
       - name: COPY_TEMPLATES
         shell: bash
         run: |
-          cp ./templates/winget/Gruntwork/Terragrunt/* ./../winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
+          cp ./templates/winget/Gruntwork/Terragrunt/* ./winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
 
       - name: REPLACE_VALUES
         shell: bash
         run: |
-          cd ./../winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
+          cd ./winget-pkgs/manifests/g/Gruntwork/Terragrunt/$TERRAGRUNT_VERSION
           sed s/${version}/$TERRAGRUNT_VERSION * &&
           sed s/${releaseDate}/$TERRAGRUNT_PUBLISHED_AT * &&
           sed s/${x86sha256}/$TERRAGRUNT_BINARY_X86_SHA256 * &&
@@ -80,6 +80,6 @@ jobs:
       - name: COMMIT_AND_PUSH
         shell: bash
         run: |
-          cd ./../winget-pkgs &&
+          cd ./winget-pkgs &&
           git commit -s -m "New version: Gruntwork.Terragrunt version $TERRAGRUNT_VERSION" &&
           git push
