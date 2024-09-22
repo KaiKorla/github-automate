@@ -7,13 +7,6 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: SYNC_WINGET_PKGS
-        shell: bash
-        run: |
-          gh workflow run sync-fork_winget-pkgs.yml
-        env:
-          GH_TOKEN: ${{ secrets.WORKFLOW_RUN_TOKEN }}
-
       - name: CHECKOUT_AUTOMATE_REPOSITORY
         uses: actions/checkout@master
 
