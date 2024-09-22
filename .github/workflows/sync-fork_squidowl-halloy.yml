@@ -11,4 +11,4 @@ jobs:
     steps:
       - run: gh repo sync KaiKorla/halloy -b main
         env:
-          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_SYNC_TOKEN }}
