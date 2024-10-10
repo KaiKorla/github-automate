@@ -2,7 +2,7 @@ name: Sync squidowl/halloy
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+# DISABLED: need to use git rebase    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
