@@ -2,7 +2,7 @@ name: Sync microsoft/winget-pkgs
 
 on:
   schedule:
-    - cron: '0 */1 * * *'
+# DISABLED: need to use git rebase    - cron: '0 */1 * * *'
   workflow_dispatch:
 
 jobs:
